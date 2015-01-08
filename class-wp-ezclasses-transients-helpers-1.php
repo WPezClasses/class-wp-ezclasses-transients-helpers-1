@@ -30,7 +30,7 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
   class Class_WP_ezClasses_Transients_Helpers_1 extends Class_WP_ezClasses_Master_Singleton{
     
 	// private static $obj_static_instance = null;
-    protected $_arr_init; // NEW GOOD!!
+    // protected $_arr_init; // NEW GOOD!!
 	
     protected $_version;
     protected $_url;
@@ -47,11 +47,9 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
     }
 
     /**
-     *
+     * TODO - your add_action()s go in here
      */
     public function ez__construct(){
-	
-	  add_action('save_post', array($this, 'save_post_delete_transients'));
 	
 	}
 	
@@ -81,45 +79,10 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
     }
 	
 	/**
-	 * This is where the magic happens, define your transients here. 
+	 * TODO - This is where the magic happens, define your transients here. See please see example
 	 */
 	protected function transients_todo(){
-	
-	  $arr_transients = array(
-	  
-	  	// the array key / index is the transient name
-	    'transient_1'	=> array(
-		  'active'	=> true,					// TODO note: false just turns off the transient'ing. in other words, go right to method_value and return that value
-		  'expiration' => 60 * 1,				// in seconds (obviously)
-		  'type'		=> 'single',			//  or 'multi' - multi will use the name concat'ed with multi_id (name.'_'.{id}) to create multiple instances per id
-		  'multi_id'	=> false,				// ''post', 'user', TODO = other (?)
-		  'site'		=> false,				// site_transient?
-		  'arr_args'	=> array(				// args to be passed to the method specific to this transient
-			'foo'	=> 'bar'					
-		    ),
-		  'method_value'		=> 'the_method_that_delivers_the_value_for_1',
-		  'delete_events'		=> array()
-		  ),
-		
 
-	    'transient_2' => array(
-		  'active'		=> true,					
-		  'expiration' 	=> 60 * 1,
-		  'type'		=> 'multi',
-		  'multi_id'	=> 'post',
-		  'site'		=> false,
-		  'arr_args'	=> array(
-			'foo'	=> 'bar'
-		    ),
-		  'method_value'		=> 'the_method_that_delivers_the_value_for_2',
-		  'delete_events'		=> array(
-		    'save_post_personnel' 		=> true,
-			'delete_method_2_swtich_2'	=> true,
-			),
-		  ),
-		);
-		
-		return $arr_transients; 
 	}
 	
 	/**
@@ -141,48 +104,6 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 	  );
 	  
 	  return $arr_defaults;
-	
-	}
-	
-	/**
-	 * add your methods for method_value to your own class.
-	 */
-	static public function the_method_that_delivers_the_value_for_1($arr_args){
-	
-	  return '1_ - ' . time();
-	
-	}
-	
-	/**
-	 *
-	 */
-	static public function the_method_that_delivers_the_value_for_2($arr_args){
-	
-	  return '2_ - ' . time();
-	  
-	}
-	
-	/**
-	 *
-	 */
-	public function save_post_delete_transients(){
-	  global $post;
-	  
-	  $post->post_type;
-	  
-	  switch ($post->post_type){
-	  
-	    case 'page':
-		  // some logic here
-		  break;
-		
-	    case 'personnel':
-		  $this->delete_transient('save_post_personnel');
-		  break;
-		
-	    default:
-	
-	  }
 	
 	}
 	
@@ -354,34 +275,6 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 		  return get_the_id();
 	  }
 	}
-	
-	// TODO - Important! If you want some static-ness, this needs to be in your class (that inherits this class)
-	/**
-	 * A slight bit of fakin' some static funk. 
-	 */
-	 
-	/*
-	public static function get( $str_name = ''){
-	 
-	   if ( ! is_string($str_name) || empty($str_name) ){
-	     return $str_name;
-	   }
-	   
-	   if ( self::$obj_static_instance === NULL ) {
-	     self::$obj_static_instance = TODO_CLASS_NAME::ez_new();
-       }
-	   
-	   return self::$obj_static_instance->get_transient($str_name);	 
-	 }
-	 */	 
 
   }
 }
-
-// TODO - Important! This needs to be in your class (that inherits this class)
-/*
-$obj_new_init_ez_transients = TODO_CLASS_NAME::ez_new();
-
-// Note: If for some reason you have more than one class to define transients, you can't use the same alias. I know, #Duh (but just in case we mention it anyway)
-class_alias('TODO_CLASS_NAME', 'WPezTransients');
-*/

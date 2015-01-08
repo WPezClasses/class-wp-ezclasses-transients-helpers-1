@@ -16,7 +16,9 @@ you can access your transients from just about anywhere.
 
 #### Overview
 
-TODO: See the example in the folder: product-packaging.
+See the example in the folder: product-packaging.
+
+TODO: Example for WPezPlugins
 
 
 ####Share This Repo
