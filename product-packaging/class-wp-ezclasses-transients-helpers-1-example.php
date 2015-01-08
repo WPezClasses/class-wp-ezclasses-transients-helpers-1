@@ -21,6 +21,8 @@
  */
 /**
  * == TODO ==
+ * 
+ * Add / expose a delete_transient method().
  *
  * Use it. Test it. Beat it up.
  *
@@ -148,6 +150,11 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1_Example')) {
 	 */
 	public function save_post_delete_transients(){
 	  global $post;
+	  
+	  // New post trigger the save_post but there is not really a post yet so we're outta here
+	  if ( empty($post) ){
+	    return;
+	  }
 	  
 	  $post->post_type;
 	  
