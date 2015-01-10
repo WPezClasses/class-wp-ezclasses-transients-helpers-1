@@ -24,15 +24,17 @@ With this new & improved approach (i.e., The ezWay), via a single static get all
 
 Or if the definition of the calculation for the value changes - say, a different WP_Query - you know exactly where to make that update. No more sprawl, or ideally a lot less. 
 
+
 >
 >######The Bonus Round
 >
->In theory, it's possible to include your globals / constants along with your transient centralizing, and just use active => false, since you (probably) don't actually need a transients.
+>In theory, it's possible to include your globals / constants along with your transient centralizing, and just use active => false, since you (probably) don't actually need a transient.
 >
->For example, perhaps you're using an array of some (more of less) fixed set of values in multiple places across your site / application / project. Since the ultimate purpose here is centralization, as well as easy of use / maintenance, it might make sense to define that array along with your transients. Then you have a single goto class to lean on for common / universal values.
+>For example, perhaps you're using an array of some (more of less) fixed set of values in multiple places across your site / application / project. Since the ultimate purpose here is centralization, as well as ease of use / maintenance, it might make sense to define that array along with your transients. Then you have a single goto class to lean on for common / universal values (and most of the term are transients).
 >
->And if for some reason a fixed array becomes more dynamic (read: database driven) then all you have to do is update the method that does the value and make active => true. Bingo! You've got a transient.
+>The added benefit on top of that is that if for some reason that fixed array becomes dynamic (read: rule and/or database driven) then all you have to do is update the method that does the value for that "transient" and also set active => true. Bingo! You've got a transient and the rest of your code doesn't have to be updated.
 >
+
 
 You can also define when a transient should be deleted. For example, if a particular post_type is updated (i.e., action: save_post) you can have transients that need that lean on that update / post_type be deleted (indirectly) by that save_post event. 
 
