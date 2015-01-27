@@ -98,9 +98,11 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 		'expiration'	=> 60*60, 			// 60 sec * 60 mins
 		'type'			=> 'single',
 	    'multi_id'		=> 'post',			// multi_id type: 'post', 'user'. Others are TODO.
-		'arr_args'		=> array(),
-		'method_value'	=> '',	
-		'delete_events'	=> array(),
+		'calculate'		=> array(
+		  'method' => '', 
+		  'arr_args' => array(),
+		  ),	
+		'delete'		=> array(),
 	  );
 	  
 	  return $arr_defaults;
@@ -122,29 +124,44 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 	 * somewhat awkard (at first).
 	 */
 	protected function delete_transient ($str_current_event = ''){
-
+  
 	  $arr_defaults = $this->transients_defaults();
 	  $arr_transients_all = $this->transients_todo();
 	  
 	  // get all our transient definitions
-	  foreach ($arr_transients_all as $str_name => $arr_transient){
+	  foreach ( $arr_transients_all as $str_name => $arr_transient){
 	    $arr_transient = array_merge($arr_defaults, $arr_transient);
 		
 		// is there any delete parms for this particular transient?
-		if ( isset($arr_transient['delete_events']) && is_array($arr_transient['delete_events']) ){
+		if ( isset($arr_transient['delete']['events']) && is_array($arr_transient['delete']['events']) && ! empty($arr_transient['delete']['events']) ){
 		  // loop over the delete event to see if one matches the current_event
-		  foreach ( $arr_transient['delete_events'] as $str_key => $bool_active ){
-		    if ($str_key == $str_current_event && $bool_active === true){
-			  // match! get the full name
-			  $str_full_name = $this->get_transient_name($str_name, $arr_transient);
-			  // site or regular?
+		  
+		  $arr_delete_events = $arr_transient['delete']['events'];
+		  if ( isset($arr_delete_events[$str_current_event]) && $arr_delete_events[$str_current_event] === true ){
+		    
+			$str_full_name = $this->get_transient_name($str_name, $arr_transient);
+		    if ( $arr_transient['type'] == 'multi' && $arr_transient['multi_id'] == 'term' ){
+			
+			  if ( isset($arr_transient['delete']['arr_args']['taxonomy']) ){
+			    // which taxonomy terms are driving this term based multi?
+			    $str_taxonomy = $arr_transient['delete']['arr_args']['taxonomy'];
+				// get the terms for this taxonomy
+				$arr_terms = get_terms( $str_taxonomy, array('hide_empty' => false ));
+				foreach ( $arr_terms as $int_key => $obj ){
+				  
+				  if ( $arr_transient['site'] === true ){
+				    delete_site_transient($str_full_name . $obj->term_id);
+				  } else {
+				    delete_transient($str_full_name . $obj->term_id); 
+				  }
+				}
+			  }
+			} else {
 			  if ( $arr_transient['site'] === true ){
 			    delete_site_transient($str_full_name);
 			  } else {
-			   delete_transient($str_full_name);
+			    delete_transient($str_full_name); 
 			  }
-			  // no need to keep looping, we can move on
-			  continue;
 			}
 		  }
 		}
@@ -199,16 +216,20 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 	    if ($mix_this_transient !== false){
 	      return $mix_this_transient;
 	    }
+
 	  }
 	  
-	  // oh my. we got nuttin'. we need to reload the transient. 
+	  // oh my. we got nuttin'. we need to recalculate the transient. 
 	  // what's the method that calculates the value?
-	  $str_method_value = $arr_transient['method_value'];
-	  $arr_args = $arr_transient['arr_args'];
+	  
+	  // TODO - isset these and then do ??? if not
+	  $str_method_value = $arr_transient['calculate']['method'];
+	  $arr_args = $arr_transient['calculate']['arr_args'];
 
 	  if ( method_exists($this, $str_method_value)){
 	    $mix_value = $this->$str_method_value($arr_args);
 	  } else {
+	  
 		  // TODO - if we don't have the method, that what? 
 	  }
 	  
@@ -243,7 +264,7 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 	  if ( $arr_transient['type'] == 'multi' ){
 	    $str_full_name = $str_full_name . '_' . $this->get_multi_id($arr_transient['multi_id']);
 	  }
-	  
+  
 	  return $str_full_name;
 	}
 	
@@ -267,7 +288,7 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 		  return get_current_user_id();
           break;
 		  
-		case 'taxonomy':
+		case 'term':
 		  global $wp_query;
 		  
 		//  print_r($wp_query);
@@ -276,7 +297,7 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 			  return $wp_query->queried_object->term_id;
 			}
 		 }
-		 return -1;
+		 return '';
 		 break;
 		  
 	    case 'other': // ???
