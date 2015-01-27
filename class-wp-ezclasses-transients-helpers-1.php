@@ -235,11 +235,11 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 	  // merge'em!
 	  $arr_transient = array_merge($arr_defaults,$arr_transient);
 	  
-	  // we need some magic for the name if it's a 'type' => 'multi'
 	  $str_prefix = $arr_transient['prefix'];
 	  $str_suffix = $arr_transient['suffix'];
 	  
 	  $str_full_name = $str_prefix . $str_name . $str_suffix;
+	  // we need some magic for the name if it's a 'type' => 'multi'
 	  if ( $arr_transient['type'] == 'multi' ){
 	    $str_full_name = $str_full_name . '_' . $this->get_multi_id($arr_transient['multi_id']);
 	  }
@@ -266,6 +266,18 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 		case 'user':
 		  return get_current_user_id();
           break;
+		  
+		case 'taxonomy':
+		  global $wp_query;
+		  
+		//  print_r($wp_query);
+		  if ( isset($wp_query->queried_object) ){
+		    if ( isset($wp_query->queried_object->term_id) ){
+			  return $wp_query->queried_object->term_id;
+			}
+		 }
+		 return -1;
+		 break;
 		  
 	    case 'other': // ???
           return 'TODO';
