@@ -127,7 +127,7 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
   
 	  $arr_defaults = $this->transients_defaults();
 	  $arr_transients_all = $this->transients_todo();
-	  
+//	  print_r($arr_transients_all);
 	  // get all our transient definitions
 	  foreach ( $arr_transients_all as $str_name => $arr_transient){
 	    $arr_transient = array_merge($arr_defaults, $arr_transient);
@@ -138,25 +138,36 @@ if (!class_exists('Class_WP_ezClasses_Transients_Helpers_1')) {
 		  
 		  $arr_delete_events = $arr_transient['delete']['events'];
 		  if ( isset($arr_delete_events[$str_current_event]) && $arr_delete_events[$str_current_event] === true ){
-		    
+   
 			$str_full_name = $this->get_transient_name($str_name, $arr_transient);
+			
+			/**
+			 * When transient'ing by (tax) term (id) we can't be sure which to update so eff it, we zap'em all for the tax (in the delete arr_args).
+			 */
 		    if ( $arr_transient['type'] == 'multi' && $arr_transient['multi_id'] == 'term' ){
 			
-			  if ( isset($arr_transient['delete']['arr_args']['taxonomy']) ){
+			  if ( isset($arr_transient['delete']['arr_args']['taxonomy']) && is_array($arr_transient['delete']['arr_args']['taxonomy']) && ! empty($arr_transient['delete']['arr_args']['taxonomy']) ){
 			    // which taxonomy terms are driving this term based multi?
-			    $str_taxonomy = $arr_transient['delete']['arr_args']['taxonomy'];
-				// get the terms for this taxonomy
-				$arr_terms = get_terms( $str_taxonomy, array('hide_empty' => false ));
-				foreach ( $arr_terms as $int_key => $obj ){
-				  
-				  if ( $arr_transient['site'] === true ){
-				    delete_site_transient($str_full_name . $obj->term_id);
-				  } else {
-				    delete_transient($str_full_name . $obj->term_id); 
+				foreach ( $arr_transient['delete']['arr_args']['taxonomy'] as $str_taxonomy => $bool_flag ){
+				  if ( $bool_flag === true ){
+				    $arr_terms = get_terms( $str_taxonomy, array('hide_empty' => false ));
+					// loop over the terms and delete!
+					foreach ( $arr_terms as $int_key => $obj ){
+					  $str_delete_this = $str_full_name . $obj->term_id;
+					  if ( $arr_transient['site'] === true ){
+					    delete_site_transient($str_delete_this = $str_full_name . $obj->term_id);
+					  } else {
+					    delete_transient($str_delete_this = $str_full_name . $obj->term_id); 
+				      }
+				    }
 				  }
 				}
 			  }
 			} else {
+			
+			  /**
+			   * the other types aren't as tricky as 'multi', not at all. thank gawd
+			   */
 			  if ( $arr_transient['site'] === true ){
 			    delete_site_transient($str_full_name);
 			  } else {
